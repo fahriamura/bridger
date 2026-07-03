@@ -63,7 +63,7 @@ async def main():
             cmd = json.loads(line.decode())
             action = cmd.get("action", "")
             print(f">>> {action}")
-            result = {"ok": True}
+            result = {"ok": True, "_cid": cmd.get("_cid", "")}
             
             if action == "status":
                 result.update({"url": "chrome", "title": "CDP Connected"})
