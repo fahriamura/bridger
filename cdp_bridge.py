@@ -6,7 +6,20 @@ import asyncio, json, websockets, base64
 
 SERVER_IP = "76.13.18.146"
 SERVER_PORT = 5099
-CDP_URL = "ws://localhost:9222/devtools/browser/724f1162-d7a1-4176-bf1f-86de4bd1595f"
+import urllib.request
+# Auto-detect CDP WebSocket URL
+def get_cdp_url():
+    try:
+        resp = urllib.request.urlopen("http://localhost:9222/json/version", timeout=5)
+        data = json.loads(resp.read())
+        return data["webSocketDebuggerUrl"]
+    except Exception as e:
+        print(f"❌ Cannot connect to Chrome CDP: {e}")
+        print("   Make sure Chrome is running with --remote-debugging-port=9222")
+        exit(1)
+
+CDP_URL = get_cdp_url()
+print(f"🔗 CDP URL: {CDP_URL}")
 
 async def cdp_command(ws, cmd):
     """Send CDP command and wait for result"""
