@@ -69,10 +69,17 @@ async def main():
                 result.update({"url": "chrome", "title": "CDP Connected"})
                 
             elif action == "navigate":
+                # Attach to tab first
+                attach = await cdp_command(cdp, {"method": "Target.attachToTarget",
+                    "params": {"targetId": tab_id, "flatten": True}})
+                session_id = attach.get("sessionId")
+                
                 r = await cdp_command(cdp, {"method": "Page.navigate",
-                    "params": {"url": cmd["url"]}, "targetId": tab_id})
-                # Wait for page load
+                    "params": {"url": cmd["url"]}, "sessionId": session_id})
                 await asyncio.sleep(3)
+                
+                await cdp_command(cdp, {"method": "Target.detachFromTarget",
+                    "params": {"targetId": tab_id, "sessionId": session_id}})
                 result["url"] = cmd["url"]
                 
             elif action == "screenshot":
